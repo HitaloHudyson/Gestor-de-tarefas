@@ -28,7 +28,7 @@ public class Main {
 
         do {
             ler(caminho_menu);
-            opcao = Scanner.nextInt();
+            opcao = scanner.nextInt();
 
         } while(stop == false);
     }

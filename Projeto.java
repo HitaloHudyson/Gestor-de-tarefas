@@ -8,6 +8,4 @@ public class Projeto {
         this.nome_projeto = nome_projeto;
         this.descricao = descricao;
     }
-
-    
 }
