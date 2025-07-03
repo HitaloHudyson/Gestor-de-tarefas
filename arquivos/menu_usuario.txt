@@ -1,14 +1,13 @@
 +----------------------------------------+
 |                                        |
-|         GERENCIADOR DE TAREFAS         |
+|                 USUARIO                |
 |                                        |
 +----------------------------------------+
 |                                        |
-|   [1] Usuario                          |
-|   [2] Projetos                         |
-|   [3] Tarefas                          |
+|   [1] Cadastrar usuario                |
+|   [2] Listar Usuarios                  |
 |                                        |
-|   [0] Sair                             |
+|   [0] Voltar                           |
 |                                        |
 +----------------------------------------+
 |                                        |
