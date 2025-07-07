@@ -15,7 +15,8 @@ O Gestor de Tarefas é um projeto para avaliação de poo, com o objetivo de fac
 
 💻 Tecnologias Utilizadas
 
-Java (ou outra linguagem)
+Java (openjdk 21.0.7 2025-04-15)
+
 
 Git
 
