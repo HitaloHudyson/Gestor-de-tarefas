@@ -1,13 +1,19 @@
 import java.util.InputMismatchException;  //EXCEÇÃO PARA ENTRADA INVÁLIDA
-import java.io.IOException;               //MOSTRAR EXCEÇÃO CASO O ARQUIVO NÃO SEJA ENCONTRADO
+import java.io.IOException;               //ENTRADA/SAÍDA
+import java.io.FileNotFoundException;     //SUBCLASSE DA IO, USADA QUANDO O ARQUIVO NÃO EXISTE, OU NÃO PODE SER ACESSADO
+
 import java.io.BufferedReader;            //LEITURA EFICIENTE DE UM ARQUIVO (BLOCO DE TEXTO)
 import java.io.FileReader;                //LER O CONTEUDO DO ARQUIVO (PALAVRA POR PALAVRA)
+
 import java.util.Scanner;                 //ENTRADA DE DADOS
 import java.io.BufferedWriter; 		      //ESCREVER NO ARQUIVO (BLOCO DE TEXTO)
 import java.io.FileWriter; 			      //ESCREVER O CONTEUDO DO ARQUIVO (PALAVRA POR PALAVRA)
-import java.util.Map;                     //INTERFACE
-import java.util.HashMap;                 //
-import java.io.FileNotFoundException;
+
+import java.util.Map;                     //INTERFACE DE ESTRUTURA DE  DAOS ---> CHAVE ---> VALOR
+import java.util.HashMap;                 //UMA FORMA DE IMPLEMENTAR O MAP  --> NÃO GARANTE ORDEM
+
+import java.util.List;                    //É UMA INTERFACE
+import java.util.ArrayList;               //
 
 public class Main {
 	
@@ -17,12 +23,12 @@ public class Main {
 	public static final String vermelho_fundo = "\u001B[41m";//vermelho de fundo
 
 	public static final String caminho_menu = "arquivos/TXT/menu_principal.txt";         //CAMINHO DO ARQUIVO DO MENU PRINCIPAL
-	public static final String caminho_menu_usuario = "arquivos/TXT/menu_usuario.txt";   //CAMINHO DO ARQUIVO DO MENU DE USUÁRIO
+	public static final String caminho_menu_usuario = "arquivos/TXT/menu_usuarios.txt";   //CAMINHO DO ARQUIVO DO MENU DE USUÁRIO
 	public static final String caminho_usuarios = "arquivos/usuario.csv";                //CAMINHO DO ARQUIVO DE USUÁRIOS
 	public static final String caminho_menu_projetos = "arquivos/TXT/menu_projetos.txt"; //CAMINHO DO ARQUIVO DE PROJETOS TXT
-	public static  final String caminho_projetos = "arquivos/projeto.csv";               //CAMINHO DO ARQUIVO DE PROJETOS CSV
-
-
+	public static final String caminho_projetos = "arquivos/projeto.csv";               //CAMINHO DO ARQUIVO DE PROJETOS CSV
+	public static final String caminho_menu_tarefas = "arquivos/TXT/menu_tarefas.txt";      //CAMINHO DO ARQUIVO DE TAREFA TXT
+	public static final String caminho_tarefas = "arquivos/tarefas.csv";                //CAMINHO DO ARQUIVO DE TAREFA CSV
 
 	static String nome_usuario = "admin";
 	protected static boolean stop = false;              //VARIAVEL RESPONSAVEL POR PARAR O PROGRAMA
@@ -89,7 +95,7 @@ public class Main {
 
 					if(escolher == 1) {
 						id_projeto = obterProximoId(caminho_projetos);
-						criarProjeto(projeto, usuario, caminho_projetos, scanner);                //CHAMA O MÉTODO PARA CRIAR USUÁRIO
+						criarProjeto(projeto, id_projeto, usuario, caminho_projetos, scanner);                //CHAMA O MÉTODO PARA CRIAR USUÁRIO
 						break;
 
 					} else if (escolher == 2) {
@@ -99,13 +105,32 @@ public class Main {
 						scanner.nextLine();
 						espaco();
 						break;
+					} else if (escolher == 0) {
+						break;
+					}
+
+					//Tarefa --> CRIAR TAREFA SIMPLES
+				case 3:
+					usuario.mostrar_titulo(id_usuario, nome_usuario);
+					ler_arquivo_TXT(caminho_menu_tarefas);
+					escolher = escolha_menu(scanner);
+					espaco();
+
+					if (escolher == 1) {
+						criarTarefa(usuario, scanner);
+						break;
+					} else if (escolher == 2) {
+						listarTarefasPorProjeto(scanner);
+						break;
+					} else if(escolher == 3) {
+						marcarTarefaComoConcluida(usuario, scanner);
+						break;
 					}
 
 
 			}
 		} while(!stop);
 	}
-
 
 	protected static int escolha_menu(Scanner scanner) {
 		int escolha_do_usuario;
@@ -253,7 +278,7 @@ public class Main {
 			}
 		} catch (IOException e) {
 			System.out.println("Erro ao ler o arquivo de usuários: " + e.getMessage());
-			return null; // Retorna nulo se não conseguir ler o arquivo
+			return null; // RETORNA NULO SE NAO CONSEGUIR LER O ARQUIVO
 		}
 
 		if (usuariosDisponiveis.isEmpty()) {
@@ -261,7 +286,7 @@ public class Main {
 			return null;
 		}
 
-		// ETAPA 2: Apresentar os usuários e pedir uma escolha.
+		// ETAPA 2: PEDE AO USUARIO UMA ESCOLHA
 		System.out.println("\n--- Trocar de Usuário ---");
 		System.out.println(fundo_branco + preto + "Selecione um dos usuários abaixo:" + padrao);
 
@@ -298,7 +323,7 @@ public class Main {
 	}
 
 	private static int obterProximoIdProjeto(String caminho_projetos) {
-		// Define um ID inicial. Se o arquivo estiver vazio, o primeiro ID será 101.
+		// Define um ID inicial, Se o arquivo estiver vazio, o primeiro ID será 101.
 		int maxId = 100;
 
 		try (BufferedReader br = new BufferedReader(new FileReader(caminho_projetos))) {
@@ -335,7 +360,7 @@ public class Main {
 	}
 
 
-	private static void criarProjeto(Projetos projeto, Usuarios usuario, String caminho_projetos, Scanner scanner) {
+	private static void criarProjeto(Projetos projeto, int novo_id_projeto, Usuarios usuario, String caminho_projetos, Scanner scanner) {
 		String nome_projeto;
 		String descricao;
 
@@ -356,9 +381,6 @@ public class Main {
 		//ID DO USUÁRIO LOGADO
 		int id_usuario_atual = usuario.getID();
 
-		// CHAMAR O NOVO ID DO PROJETO (ID INCREMENTADO)
-		int novo_id_projeto = obterProximoIdProjeto(caminho_projetos);
-
 		//SEGUNDA ETAPA --> ESCREVER OS DADOS FORNECIDOS NO PROJETO.CSV
 		try (FileWriter fw = new FileWriter(caminho_projetos, true); BufferedWriter writer = new BufferedWriter(fw)) {
 			// Use as variáveis com os IDs corretos!
@@ -372,6 +394,236 @@ public class Main {
 			System.err.println( vermelho_fundo + "Erro ao escrever no arquivo CSV: " + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	private static void criarTarefa(Usuarios usuario, Scanner scanner) {
+		System.out.println(fundo_branco + preto + "--- Criar Nova Tarefa ---" + padrao);
+
+		// LISTAR E SELECIONAR O PROJETO
+		System.out.println(fundo_branco + preto + "Selecione o projeto para adicionar a tarefa:" + padrao);
+		listar(caminho_projetos, scanner);
+
+		int idProjetoSelecionado;
+		while (true) {
+			System.out.print("Digite o ID do Projeto: ");
+			try {
+				idProjetoSelecionado = Integer.parseInt(scanner.nextLine());
+				// TODO: Adicionar validação para ver se o projeto existe
+				break;
+			} catch (NumberFormatException e) {
+				System.out.println(vermelho_fundo + "ID inválido. Digite um número." + padrao);
+			}
+		}
+
+		// 2. Obter nome da tarefa
+		String nomeTarefa;
+		while (true) {
+			System.out.print(fundo_branco + preto + "Digite o nome da tarefa: " + padrao);
+			nomeTarefa = scanner.nextLine();
+			if (!nomeTarefa.trim().isEmpty()) {
+				break;
+			} else {
+				System.out.println(vermelho_fundo + "O nome da tarefa não pode ser vazio." + padrao);
+			}
+		}
+
+		// 3. Gerar ID e salvar no arquivo
+		int idTarefa = obterProximoId(caminho_tarefas);
+		int idUsuarioAtual = usuario.getID();
+		String status = "Pendente";
+
+		try (FileWriter fw = new FileWriter(caminho_tarefas, true);
+			 BufferedWriter writer = new BufferedWriter(fw)) {
+
+			// Formato: id_tarefa,id_projeto,id_usuario,"nome_tarefa","status"
+			writer.write(idTarefa + "," + idProjetoSelecionado + "," + idUsuarioAtual + ",\"" + nomeTarefa + "\",\"" + status + "\"");
+			writer.newLine();
+
+			System.out.println(fundo_branco + preto + "Tarefa '" + nomeTarefa + "' criada com sucesso no projeto " + idProjetoSelecionado + "." + padrao);
+			System.out.print("Pressione ENTER para continuar...");
+			scanner.nextLine();
+
+		} catch (IOException e) {
+			System.err.println(vermelho_fundo + "Erro ao salvar a tarefa: " + e.getMessage() + padrao);
+		}
+	}
+
+	private static void listarTarefasPorProjeto(Scanner scanner) {
+		System.out.println("--- Listar Tarefas por Projeto ---");
+
+		// LISTAR E SELECIONAR
+		System.out.println(fundo_branco + preto + "Selecione o projeto para listar as tarefas:" + padrao);
+		listar(caminho_projetos, scanner);
+
+		int idProjetoSelecionado;
+		while (true) {
+			System.out.print("Digite o ID do Projeto: ");
+			try {
+				idProjetoSelecionado = Integer.parseInt(scanner.nextLine());
+				break;
+			} catch (NumberFormatException e) {
+				System.out.println(vermelho_fundo + "ID inválido. Digite um número." + padrao);
+			}
+		}
+
+		System.out.println("\n--- Tarefas do Projeto " + idProjetoSelecionado + " ---");
+		boolean encontrou = false;
+		try (BufferedReader br = new BufferedReader(new FileReader(caminho_tarefas))) {
+			String linha;
+			while ((linha = br.readLine()) != null) {
+				if (linha.trim().isEmpty()) continue;
+
+				String[] partes = linha.split(",");
+				if (partes.length >= 2) {
+					try {
+						int idProjetoNaLinha = Integer.parseInt(partes[1].trim());
+						if (idProjetoNaLinha == idProjetoSelecionado) {
+							System.out.println("- " + linha);
+							encontrou = true;
+						}
+					} catch (NumberFormatException e) {
+						// Ignora
+					}
+				}
+			}
+		} catch (IOException e) {
+			System.err.println(vermelho_fundo + "Erro ao ler o arquivo de tarefas." + padrao);
+		}
+
+		if (!encontrou) {
+			System.out.println("Nenhuma tarefa encontrada para este projeto.");
+		}
+		System.out.print("\nPressione ENTER para continuar...");
+		scanner.nextLine();
+	}
+
+	private static void marcarTarefaComoConcluida(Usuarios usuario, Scanner scanner) {
+		System.out.println("--- Marcar Tarefa como Concluída ---");
+		System.out.println(fundo_branco + preto + "Suas tarefas pendentes:" + padrao);
+
+		//LISTAR AS TAREFAS PENDENTES DO USUARIO
+		List<String> tarefasPendentes = new ArrayList<>();       //LISTA DE TAREFAS PENDENTES
+		int idUsuarioAtual = usuario.getID();                    //PEGA ID DO USUARIO LOGADO
+
+		try (BufferedReader br = new BufferedReader(new FileReader(caminho_tarefas))) {  //LEITOR
+			String linha;
+			while ((linha = br.readLine()) != null) {                    //ENQUANTO A LINHA != NULL FAÇA
+				if (linha.trim().isEmpty()) continue;                    //LINHA VAZIA --> CONTINUE
+				String[] partes = linha.split(",");                //ARRAY DE STRING DIVIDO TODA  VEZZ QUE APARECE A VIRGULA
+
+				// Formato: id_tarefa,id_projeto,id_usuario,"nome_tarefa","status"
+				if (partes.length >= 5) {
+					try {
+						int idUsuarioNaLinha = Integer.parseInt(partes[2].trim());                              //TRANSFORMANDO EM INTEIRO
+						String status = partes[4].trim().replace("\"", "");
+
+						//SE O ID DA LINHA IGUAL AO DO USUARIO E FOR PENDENTE ---> IMPRIME A LINHA
+						if ((idUsuarioNaLinha == idUsuarioAtual) && status.equalsIgnoreCase("Pendente")) {
+							System.out.println("- " + linha);
+							tarefasPendentes.add(linha);
+						}
+					} catch (NumberFormatException e) { /* ignora */ }
+				}
+			}
+		} catch (IOException e) {
+			System.err.println(vermelho_fundo + "Erro ao ler tarefas." + padrao);
+			return;                                                                //SAI DO METODO SE FALHAR
+		}
+
+		if (tarefasPendentes.isEmpty()) {                                      //SE A LISTA ESTIVER VAZIA SAIA DO METODO
+			System.out.println("Você não tem tarefas pendentes.");
+			System.out.print("\nPressione ENTER para continuar...");
+			scanner.nextLine();
+			return;
+		}
+
+		// PEDE O ID  PARA CONCLUIR TAREFA
+		int idTarefaParaConcluir;                              //PEGA O ID DA TAREFA QUE QUER CONCLUIR
+		while (true) {
+			System.out.print("\nDigite o ID da tarefa que deseja marcar como concluída: ");
+			try {
+				idTarefaParaConcluir = Integer.parseInt(scanner.nextLine());
+				break;
+			} catch (NumberFormatException e) {
+				System.out.println(vermelho_fundo + "ID inválido. Digite um número." + padrao);
+			}
+		}
+
+		//LER MODIFICA E RESCREVE O ARQUIVO
+		List<String> todasAsLinhas = new ArrayList<>();
+		boolean atualizou = false;
+		try (BufferedReader br = new BufferedReader(new FileReader(caminho_tarefas))) {
+			String linha;
+			while ((linha = br.readLine()) != null) {
+				if (linha.trim().isEmpty()) continue;
+				String[] partes = linha.split(",");
+				if (partes.length >= 1) {
+					try {
+						int idAtual = Integer.parseInt(partes[0].trim());
+						if (idAtual == idTarefaParaConcluir) {
+							// Formato: id_tarefa,id_projeto,id_usuario,"nome_tarefa","status"
+							linha = partes[0] + "," + partes[1] + "," + partes[2] + "," + partes[3] + ",\"Concluída\"";
+							atualizou = true;
+						}
+					} catch (NumberFormatException e) { /* ignora */ }
+				}
+				todasAsLinhas.add(linha);
+			}
+		} catch (IOException e) {
+			System.err.println(vermelho_fundo + "Erro ao ler o arquivo para atualização." + padrao);
+			return;
+		}
+
+		if (atualizou) {
+			try (FileWriter fw = new FileWriter(caminho_tarefas, false); // false para sobrescrever
+				 BufferedWriter writer = new BufferedWriter(fw)) {
+				for (String linha : todasAsLinhas) {
+					writer.write(linha);
+					writer.newLine();
+				}
+				System.out.println(fundo_branco + preto + "Tarefa " + idTarefaParaConcluir + " marcada como concluída!" + padrao);
+			} catch (IOException e) {
+				System.err.println(vermelho_fundo + "Erro ao salvar as alterações no arquivo." + padrao);
+			}
+		} else {
+			System.out.println(vermelho_fundo + "Tarefa com ID " + idTarefaParaConcluir + " não encontrada ou não pertence a você." + padrao);
+		}
+
+		System.out.print("\nPressione ENTER para continuar...");
+		scanner.nextLine();
+	}
+
+	private static void listarTarefasPendentesDoUsuario(Usuarios usuario, Scanner scanner) {
+		System.out.println("--- Suas Tarefas Pendentes ---");
+		int idUsuarioAtual = usuario.getID();
+		boolean encontrou = false;
+
+		try (BufferedReader br = new BufferedReader(new FileReader(caminho_tarefas))) {
+			String linha;
+			while ((linha = br.readLine()) != null) {
+				if (linha.trim().isEmpty()) continue;
+				String[] partes = linha.split(",");
+				if (partes.length >= 5) {
+					try {
+						int idUsuarioNaLinha = Integer.parseInt(partes[2].trim());
+						String status = partes[4].trim().replace("\"", "");
+						if (idUsuarioNaLinha == idUsuarioAtual && status.equalsIgnoreCase("Pendente")) {
+							System.out.println("- " + linha);
+							encontrou = true;
+						}
+					} catch (NumberFormatException e) { /* ignora */ }
+				}
+			}
+		} catch (IOException e) {
+			System.err.println(vermelho_fundo + "Erro ao ler o arquivo de tarefas." + padrao);
+		}
+
+		if (!encontrou) {
+			System.out.println("Você não possui tarefas pendentes.");
+		}
+
+		System.out.print("\nPressione ENTER para continuar...");
+		scanner.nextLine();
 	}
 
 	//METODO PARA AFASTAR O ULTIMO OUTPUT
