@@ -43,5 +43,5 @@ git clone
 cd Gestor-de-tarefas
 
 # Compile e execute o projeto
-javac *.java 
+javac *.java  
 java Main
