@@ -70,9 +70,17 @@ public class Main {
 						usuario = criarUsuario(id_usuario, caminho_usuarios, scanner);      //CHAMA O MÉTODO PARA CRIAR USUÁRIO
 						break;
 
-					} else if(escolher == 2) {                                              //LISTA DE USUÁRIOS CADASTRADOS
-						System.out.println(fundo_branco + preto + "Lista de usuários cadastrados:" + padrao);
-						listar(caminho_usuarios, scanner);
+					} else if(escolher == 2) {                                              
+						//LISTA DE USUÁRIOS CADASTRADOS
+						// System.out.println(fundo_branco + preto + "Lista de usuários cadastrados:" + padrao);
+						// listar(caminho_usuarios, scanner);
+						// System.out.print(fundo_branco + preto + "Digite ENTER para retornar:" + padrao);
+						// scanner.nextLine();
+						// espaco();
+						// break;
+
+						System.out.println(fundo_branco + preto + "Lista de usuários cadastrados:" + padrao)
+						listarEmThread(caminho_usuarios, scanner);
 						System.out.print(fundo_branco + preto + "Digite ENTER para retornar:" + padrao);
 						scanner.nextLine();
 						espaco();
@@ -624,6 +632,28 @@ public class Main {
 
 		System.out.print("\nPressione ENTER para continuar...");
 		scanner.nextLine();
+	}
+
+
+	public static void listarEmThread(String caminho, Scanner scanner) {
+		// Cria uma nova instância de Thread.
+		Thread threadListagem = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("(Executando em thread separada...)");
+				listar(caminho, scanner); 
+			}
+		});
+
+		threadListagem.start();
+
+		try {
+			threadListagem.join();
+			
+		} catch (InterruptedException e) {
+			System.err.println(vermelho_fundo + "A thread de listagem foi interrompida." + padrao);
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	//METODO PARA AFASTAR O ULTIMO OUTPUT
